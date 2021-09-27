@@ -1,0 +1,14 @@
+{
+  "name": "llight",
+  "version": "0.1.0",
+  "main": "src/llight.js",
+  "scripts": {
+    "build": "minify src/llight.js > dist/llight.min.js"
+  },
+  "repository": "https://github.com/lucaceriani/llight",
+  "author": "Luca Ceriani",
+  "license": "CC-BY-NC-4.0",
+  "dependencies": {
+    "minify": "^7.1.0"
+  }
+}
