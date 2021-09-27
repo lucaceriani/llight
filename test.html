@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script src="src/llight.js"></script>
+	<script>
+
+		var lista = [];
+		var item = '';
+
+		function addItem() {
+			if (item.trim() == "") return;
+			lista.push(item);
+			item = '';
+		}
+
+	</script>
+	<title>llight</title>
+</head>
+<body>
+	<h1>llight todo</h1>
+	<input ll-bind="item" type="text" ll-@enter="addItem()" >
+	<button ll-@click="addItem()"> aggiungi </button>
+	<p>Cose da fare: <span ll-text="lista.length"></span></p>
+	<ul ll-for="lista">
+		<li ll-for-here></li>
+	</ul>
+	
+</body>
+</html>
