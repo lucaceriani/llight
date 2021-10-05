@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<script src="src/llight.js"></script>
+	<script src="../src/llight.js"></script>
 	<script>
-
 		var lista = [];
 		var item = '';
+		var hiding = true;
 
 		function addItem() {
 			if (item.trim() == "") return;
@@ -18,14 +19,28 @@
 	</script>
 	<title>llight</title>
 </head>
+
 <body>
-	<h1>llight todo</h1>
-	<input ll-bind="item" type="text" ll-@enter="addItem()" >
-	<button ll-@click="addItem()"> aggiungi </button>
-	<p>Cose da fare: <span ll-text="lista.length"></span></p>
-	<ul ll-for="lista">
-		<li ll-for-here></li>
-	</ul>
-	
+	<h1 style="text-align: center;">llight examples</h1>
+	<div ll-route="/">
+		<h2>welcome</h2>
+		<ul>
+			<li>
+				<a ll-goto="/todo">todo demo app</a>
+			</li>
+		</ul>
+	</div>
+	<div ll-route="/todo">
+		<h2>llight todo</h2>
+		<button ll-@click="(hiding = !hiding)">toggle</button> <b ll-show="!hiding">me</b>
+		<br> <br>
+		<input ll-bind="item" type="text" ll-@enter="addItem()">
+		<button ll-@click="addItem()"> aggiungi </button>
+		<p>Cose da fare: <span ll-text="lista.length"></span></p>
+		<ul ll-for="lista">
+			<li><b ll-for-here></b></li>
+		</ul>
+	</div>
 </body>
+
 </html>

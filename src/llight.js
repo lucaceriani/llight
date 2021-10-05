@@ -1,92 +1,146 @@
-const llight = {
-	debugEnabled: false,
-	isInitialized: false,
+class LLight {
 
-	forId: [],
+	debugEnabled = false;
+	isInitialized = false;
+	forId = [];
 
-	// functions 	
-	update: null,
-	click: null,
-	bind: null,
-	enter: null,
-	dbg: null,
-};
+	constructor(debug = false) {
+		this.debugEnabled = debug;
+	}
 
-llight.update = function () {
+	update(firstTime = false) {
+		let ts = performance.now();
 
-	let st = performance.now();
-	const qa = (q) => document.body.querySelectorAll(q);
-	let firstTime = !llight.isInitialized;
+		const qa = (q) => document.querySelectorAll(q);
 
-	if (firstTime) llight.dbg("Called llight() first time!");
-	else llight.dbg("Called llight()");
+		if (firstTime) this.dbg("Called llight() first time!");
+		else this.dbg("Called llight()");
 
-	if (firstTime) {
+		if (firstTime) {
+			for (let node of qa('[ll-for]')) {
+				node.setAttribute('ll-for-id', this.forId.length);
+				// push the cloned first child
+				this.forId.push(node.firstElementChild.cloneNode(true));
+			}
+
+			// setup event listeners
+			for (let node of qa('[ll-bind]')) node.addEventListener('input', e => this.bind(e));
+			for (let node of qa('[ll-\\@click]')) node.addEventListener('click', e => this.click(e));
+			for (let node of qa('[ll-\\@enter]')) node.addEventListener('keydown', e => this.enter(e));
+
+			// route hash change
+			window.addEventListener('hashchange', _ => this.renderRoute());
+		}
+
+		for (let node of qa('[ll-bind]')) {
+			let variable = eval(node.getAttribute('ll-bind'));
+			node.value = variable;
+		}
+
+		for (let node of qa('[ll-text]')) {
+			node.innerText = eval(node.getAttribute('ll-text'));
+		}
+
+		for (let node of qa('[ll-class]')) {
+			// eg. ll-class="d-none:hiding"
+			// the class *d-none* is applied if expression *hiding* is true
+			let arr = node.getAttribute('ll-class').split(":");
+			if (arr.length != 2) {
+				console.error('ll-class must be in form: "class:expression"');
+				continue // skip this node;
+			}
+			// else
+			if (eval(arr[1])) node.classList.add(arr[0]);
+			else node.classList.remove(arr[0]);
+
+		}
+
+		// shows or hide based on expression
+		for (let node of qa('[ll-show]')) {
+			let expr = node.getAttribute('ll-show');
+			if (eval(expr))
+				node.style.display = '';
+			else
+				node.style.display = 'none';
+		}
+
+		// goto link route
+		for (let node of qa('a[ll-goto')) {
+			let route = node.getAttribute('ll-goto');
+			// if it doesnt start with slash add it 
+			if (!route.startsWith('/')) route = `/${route}`;
+
+			node.href = `#${route}`;
+		}
+
 		for (let node of qa('[ll-for]')) {
-			node.setAttribute('ll-for-id', llight.forId.length);
-			// push the cloned first child
-			llight.forId.push(node.firstElementChild.cloneNode(true));
+			let arr = eval(node.getAttribute('ll-for')); // the array
+			let childId = parseInt(node.getAttribute('ll-for-id')); // the id in .forId
+
+			node.innerHTML = '';
+
+			for (let item of arr) {
+				let newChildNode = this.forId[childId].cloneNode(true);
+				node.appendChild(newChildNode);
+
+				// The node to be edited can be the first child itself so if I dont find
+				// anything with query selector I return itself
+				(newChildNode.querySelector('[ll-for-here]') || newChildNode).innerText = item;
+			}
 		}
 
-		// setup event listeners
 
-		for (let node of qa('[ll-bind]')) node.addEventListener('input', llight.bind);
-		for (let node of qa('[ll-\\@click]')) node.addEventListener('click', llight.click);
-		for (let node of qa('[ll-\\@enter]')) node.addEventListener('keydown', llight.enter);
+		// router nodes
+
+		// if first time go to default route
+		if (firstTime) location.hash = '#/';
+		this.renderRoute();
+
+		// everything ok
+
+		if (firstTime) document.body.dispatchEvent(new Event('llight.initialized'));
+		else document.body.dispatchEvent(new Event('llight.updated'));
+
+		// performance
+		let te = performance.now();
+		this.dbg(`It took ${(te - ts).toFixed(3)}ms`);
+
 	}
 
-	for (let node of qa('[ll-bind]')) {
-		let variable = eval(node.getAttribute('ll-bind'));
-		node.value = variable;
+	renderRoute() {
+		let route = location.hash.substr(1); // location hash without '#'
+		document.querySelectorAll(`[ll-route="${route}"]`).forEach(el => el.style.display = '');
+		document.querySelectorAll(`[ll-route]:not([ll-route="${route}"])`).forEach(el => el.style.display = 'none');
 	}
 
-	for (let node of qa('[ll-text]')) {
-		node.innerText = eval(node.getAttribute('ll-text'));
+	click(e) {
+		let evalString = e.target.getAttribute('ll-@click');
+		eval(evalString);
+		this.update();
 	}
 
-	for (let node of qa('[ll-for]')) {
-		let arr = eval(node.getAttribute('ll-for')); // the array
-		let childId = parseInt(node.getAttribute('ll-for-id')); // the id in .forId
-
-		node.innerHTML = '';
-
-		for (let item of arr) {
-			let newChildNode = llight.forId[childId].cloneNode(true);
-			node.appendChild(newChildNode);
-
-			// The node to be edited can be the first child itself so if I dont find
-			// anything with query selector I return itself
-			(newChildNode.querySelector('[ll-for-here]') || newChildNode).innerText = item;
-		}
+	enter(e) {
+		if (e.key !== "Enter") return;
+		eval(e.target.getAttribute('ll-@enter'));
+		this.update();
 	}
 
-	let et = performance.now()
-	llight.dbg(`It took ${(et - st).toFixed(2)} ms`);
+	bind(e) {
+		let variable = e.target.getAttribute('ll-bind');
+		eval(`${variable} = ${JSON.stringify(e.target.value)}`); // assign the value
+		this.update();
+	}
 
-	// llight initialized
-	llight.isInitialized = true;
+	dbg(str) {
+		if (this.debugEnabled) console.log(str);
+		// else console.warn("llight: Called dbg(...) without enabling debug");
+	}
 }
 
-llight.click = function (e) {
-	let evalString = e.target.getAttribute('ll-@click');
-	eval(evalString);
-	llight.update();
+// global variable setup
+if (ll) {
+	console.error("llight: LLight cannot be initialized, 'll' already exists");
+} else {
+	var ll = new LLight(true);
+	document.addEventListener('DOMContentLoaded', () => ll.update(true));
 }
-
-llight.enter = function (e) {
-	if (e.key !== "Enter") return;
-	eval(e.target.getAttribute('ll-@enter'));
-	llight.update();
-}
-
-llight.bind = function (e) {
-	let variable = e.target.getAttribute('ll-bind');
-	eval(`${variable} = ${JSON.stringify(e.target.value)}`); // assign the value
-	llight.update();
-}
-
-llight.dbg = function (str) {
-	if (llight.debugEnabled) console.log(str);
-}
-
-document.addEventListener('DOMContentLoaded', llight.update);
