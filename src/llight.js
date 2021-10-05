@@ -28,6 +28,15 @@ class LLight {
 			// element self biding
 			for (let node of qa('[ll-self]')) {
 				let name = node.getAttribute('ll-self');
+
+				// if there is no name try to get the id
+				if (!name) name = node.getAttribute('id');
+
+				if (!name) {
+					console.error('llight: No attribute for "ll-self" or "id"');
+					continue
+				}
+
 				if (this.$.hasOwnProperty(name)) {
 					console.error(`llight: Trying to self-bind with name "${name}" but it already exists!`);
 				} else {

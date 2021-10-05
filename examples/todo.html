@@ -31,7 +31,7 @@
 		</ul>
 	</div>
 	<div ll-route="/todo">
-		<h2 ll-self="title">llight todo <button ll-@click="ll.$.title.style.background = 'red'"></button></h2>
+		<h2 ll-self id="title">llight todo <button ll-@click="ll.$.title.style.background = 'red'"></button></h2>
 		<button ll-@click="(hiding = !hiding)">toggle</button> <b ll-show="!hiding">me</b>
 		<br> <br>
 		<input ll-bind="item" type="text" ll-@enter="addItem()">
