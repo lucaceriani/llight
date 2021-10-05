@@ -4,6 +4,8 @@ class LLight {
 	isInitialized = false;
 	forId = [];
 
+	$ = {};
+
 	constructor(debug = false) {
 		this.debugEnabled = debug;
 	}
@@ -21,6 +23,16 @@ class LLight {
 				node.setAttribute('ll-for-id', this.forId.length);
 				// push the cloned first child
 				this.forId.push(node.firstElementChild.cloneNode(true));
+			}
+
+			// element self biding
+			for (let node of qa('[ll-self]')) {
+				let name = node.getAttribute('ll-self');
+				if (this.$.hasOwnProperty(name)) {
+					console.error(`llight: Trying to self-bind with name "${name}" but it already exists!`);
+				} else {
+					this.$[name] = node;
+				}
 			}
 
 			// setup event listeners
