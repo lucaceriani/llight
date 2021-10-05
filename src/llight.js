@@ -6,8 +6,14 @@ class LLight {
 
 	$ = {};
 
-	constructor(debug = false) {
-		this.debugEnabled = debug;
+	constructor(opts) {
+		if (opts) {
+			this.debugEnabled = opts.debug || false;
+		}
+	}
+
+	init() {
+		this.update(true);
 	}
 
 	update(firstTime = false) {
@@ -162,6 +168,5 @@ class LLight {
 if (ll) {
 	console.error("llight: LLight cannot be initialized, 'll' already exists");
 } else {
-	var ll = new LLight(true);
-	document.addEventListener('DOMContentLoaded', () => ll.update(true));
+	var ll = new LLight();
 }
