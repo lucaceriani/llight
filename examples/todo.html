@@ -9,6 +9,7 @@
 		var lista = [];
 		var item = '';
 		var hiding = true;
+		var cc = false;
 
 		function addItem() {
 			if (item.trim() == "") return;
@@ -31,6 +32,9 @@
 				<a ll-goto="/todo">todo demo app</a>
 			</li>
 		</ul>
+	</div>
+	<div>
+		<input type="checkbox" ll-bind="cc">
 	</div>
 	<div ll-route="/todo">
 		<h2 ll-self id="title">llight todo <button ll-@click="ll.$.title.style.background = 'red'"></button></h2>

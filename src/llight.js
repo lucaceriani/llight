@@ -61,7 +61,12 @@ class LLight {
 
 		for (let node of qa('[ll-bind]')) {
 			let variable = eval(node.getAttribute('ll-bind'));
-			node.value = variable;
+
+			if (/checkbox|radio/.test(node.type)) {
+				node.checked = variable;
+			} else {
+				node.value = variable;
+			}
 		}
 
 		for (let node of qa('[ll-text]')) {
@@ -154,7 +159,11 @@ class LLight {
 
 	bind(e) {
 		let variable = e.target.getAttribute('ll-bind');
-		eval(`${variable} = ${JSON.stringify(e.target.value)}`); // assign the value
+		if (/checkbox|radio/.test(e.target.type)) {
+			eval(`${variable} = ${e.target.checked}`);
+		} else {
+			eval(`${variable} = ${JSON.stringify(e.target.value)}`);
+		}
 		this.update();
 	}
 
