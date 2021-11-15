@@ -1,3 +1,5 @@
+import utils from './llight-utils';
+
 class LLight {
 
 	debugEnabled = false;
@@ -5,15 +7,18 @@ class LLight {
 	forId = [];
 
 	$ = {};
+	_ = utils;
 
-	constructor(opts) {
-		if (opts) {
-			this.debugEnabled = opts.debug || false;
-		}
+	// default options
+	opts = {
+		debug: false,
+		routing: true,
 	}
 
-	init() {
+	init(opts) {
+		this.opts = { ...this.opts, ...opts }
 		this.update(true);
+		document.dispatchEvent(new CustomEvent('llight:initialized'));
 	}
 
 	update(firstTime = false) {
@@ -39,7 +44,7 @@ class LLight {
 				if (!name) name = node.getAttribute('id');
 
 				if (!name) {
-					console.error('llight: No attribute for "ll-self" or "id"');
+					console.error('llight: No value for "ll-self" or "id"');
 					continue
 				}
 
@@ -73,6 +78,7 @@ class LLight {
 			node.innerText = eval(node.getAttribute('ll-text'));
 		}
 
+		// class setup
 		for (let node of qa('[ll-class]')) {
 			// eg. ll-class="d-none:hiding"
 			// the class *d-none* is applied if expression *hiding* is true
@@ -84,7 +90,16 @@ class LLight {
 			// else
 			if (eval(arr[1])) node.classList.add(arr[0]);
 			else node.classList.remove(arr[0]);
+		}
 
+		// custom attribute
+		for (let node of qa('[ll-attr]')) {
+			let arr = node.getAttribute('ll-attr').split("=");
+			if (arr.length == 2) {
+				node.setAttribute(arr[0], eval(arr[1]));
+			} else {
+				console.error('ll-attr must be in form: "attribute=expression"');
+			}
 		}
 
 		// shows or hide based on expression
@@ -97,7 +112,7 @@ class LLight {
 		}
 
 		// goto link route
-		for (let node of qa('a[ll-goto')) {
+		for (let node of qa('a[ll-goto]')) {
 			let route = node.getAttribute('ll-goto');
 			// if it doesnt start with slash add it 
 			if (!route.startsWith('/')) route = `/${route}`;
@@ -125,8 +140,10 @@ class LLight {
 		// router nodes
 
 		// if first time go to default route
-		if (firstTime) location.hash = '#/';
-		this.renderRoute();
+		if (this.opts.routing) {
+			if (firstTime) location.hash = '#/';
+			this.renderRoute();
+		}
 
 		// everything ok
 
@@ -135,7 +152,7 @@ class LLight {
 
 		// performance
 		let te = performance.now();
-		this.dbg(`It took ${(te - ts).toFixed(3)}ms`);
+		this.dbg(`It took ${Math.round(te - ts)} ms`);
 
 	}
 
@@ -146,6 +163,7 @@ class LLight {
 	}
 
 	click(e) {
+		if (e.target.nodeName == 'A') e.preventDefault();
 		let evalString = e.target.getAttribute('ll-@click');
 		eval(evalString);
 		this.update();
@@ -168,14 +186,38 @@ class LLight {
 	}
 
 	dbg(str) {
-		if (this.debugEnabled) console.log(str);
-		// else console.warn("llight: Called dbg(...) without enabling debug");
+		if (this.opts.debug) console.log('[llight debug] ' + str);
 	}
 }
 
 // global variable setup
-if (ll) {
+if (window.ll) {
 	console.error("llight: LLight cannot be initialized, 'll' already exists");
 } else {
-	var ll = new LLight();
+	window.ll = new LLight();
+
+	// if we need to autoinit continue...
+	if (document.currentScript && !document.currentScript.hasAttribute('ll-autoinit')) return
+
+	let autoinitValue = document.currentScript.getAttribute('ll-autoinit');
+
+	if (!autoinitValue) {
+		document.addEventListener('DOMContentLoaded', () => window.ll.init());
+		return
+	}
+
+	let opts = null;
+	try {
+		opts = eval(`(${autoinitValue})`);
+		if (typeof opts === 'object' && opts !== null) {
+			document.addEventListener('DOMContentLoaded', () => window.ll.init(opts));
+		} else {
+			throw 'Option object is not of object type or is null :(';
+		}
+	} catch (e) {
+		console.error('Error in parsing options, see below. Using default options!');
+		console.error(e);
+	}
+	// init anyway because there is 'll-autoinit' attribute
+	// init with default options
 }

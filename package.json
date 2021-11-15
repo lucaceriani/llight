@@ -1,14 +1,22 @@
 {
   "name": "llight",
   "version": "0.2.1",
-  "main": "src/llight.js",
+  "source": "src/llight.js",
+  "targets": {
+    "default": {
+      "context": "browser",
+      "outputFormat": "global",
+      "sourceMap": false
+    }
+  },
   "scripts": {
-    "build": "minify src/llight.js > dist/llight.min.js"
+    "watch": "parcel watch",
+    "build": "parcel build"
   },
   "repository": "https://github.com/lucaceriani/llight",
   "author": "Luca Ceriani",
   "license": "CC-BY-NC-4.0",
   "dependencies": {
-    "minify": "^7.1.0"
+    "parcel": "^2.0.1"
   }
 }

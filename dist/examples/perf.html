@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.4.1/css/pico.min.css">
+    <script src="../llight.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            ll.init({ routing: false });
+            start();
+        });
+
+        function start() {
+
+            const nodesCount = 1e5;
+            const timesCount = 1e0;
+
+            // add some nodes
+            let root = document.getElementById('root');
+            for (let i = 0; i < nodesCount; i++) {
+                const x = document.createElement('div');
+                x.setAttribute('ll-text', 'divText');
+                x.innerText = i.toString();
+                root.append(x);
+            }
+
+            let t = performance.now();
+            for (let i = 0; i < timesCount; i++) {
+                window.divText = i.toString();
+                ll.update();
+            }
+            console.log(performance.now() - t, 'ms');
+            console.log({ nodesCount, timesCount });
+        }
+    </script>
+    <title>llight</title>
+</head>
+
+<body class="container">
+    <h1>LLight performance test</h1>
+    <div id="root"></div>
+</body>
+
+</html>

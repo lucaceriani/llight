@@ -1,15 +1,17 @@
 <!DOCTYPE html>
-<html>
+<html ll-attr="data-theme=(theme?'dark':'light')">
 
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<script src="../src/llight.js"></script>
+	<link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.4.1/css/pico.min.css">
+	<script ll-autoinit="{debug:true}" src="../llight.js"></script>
 	<script>
 		var lista = [];
 		var item = '';
 		var hiding = true;
 		var cc = false;
+		var theme = false;
 
 		function addItem() {
 			if (item.trim() == "") return;
@@ -17,14 +19,18 @@
 			item = '';
 		}
 
-		document.addEventListener('DOMContentLoaded', () => ll.init());
-
 	</script>
 	<title>llight</title>
 </head>
 
-<body>
+<body class="container">
 	<h1 style="text-align: center;">llight examples</h1>
+	<a role="button" ll-@click="theme = !theme">swith
+		theme
+	</a>
+	<a role="button" ll-@click="alert('hello!')">
+		click me!
+	</a>
 	<div ll-route="/">
 		<h2>welcome</h2>
 		<ul>
@@ -32,9 +38,6 @@
 				<a ll-goto="/todo">todo demo app</a>
 			</li>
 		</ul>
-	</div>
-	<div>
-		<input type="checkbox" ll-bind="cc">
 	</div>
 	<div ll-route="/todo">
 		<h2 ll-self id="title">llight todo <button ll-@click="ll.$.title.style.background = 'red'"></button></h2>
