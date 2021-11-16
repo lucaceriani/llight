@@ -11,7 +11,7 @@
   },
   "scripts": {
     "watch": "parcel watch",
-    "build": "parcel build"
+    "build": "parcel build --no-cache"
   },
   "repository": "https://github.com/lucaceriani/llight",
   "author": "Luca Ceriani",

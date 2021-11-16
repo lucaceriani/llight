@@ -5,7 +5,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.4.1/css/pico.min.css">
-	<script ll-autoinit="{debug:true}" src="../llight.js"></script>
+	<script ll-autoinit="{debug:false}" src="../llight.js"></script>
 	<script>
 		var lista = [];
 		var item = '';
@@ -47,7 +47,9 @@
 		<button ll-@click="addItem()"> aggiungi </button>
 		<p>Cose da fare: <span ll-text="lista.length"></span></p>
 		<ul ll-for="lista">
-			<li><b ll-for-here></b></li>
+			<li><b ll-for-here></b> <a role="button" ll-@click="lista.splice($i$, 1)">del <span
+						ll-text="$i$"></span></a>
+			</li>
 		</ul>
 	</div>
 </body>

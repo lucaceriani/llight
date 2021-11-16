@@ -1,5 +1,5 @@
 export default {
-    randIntInclusive: randInt,
+    randInt,
     randFloat,
     randArray,
 }
